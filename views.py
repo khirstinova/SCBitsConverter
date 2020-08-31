@@ -28,6 +28,6 @@ class FileFieldView(FormView):
 def converted_view(converter):
     mime_type = converter.get_mime_type()
     data_tuple = converter.get_data()
-    response = HttpResponse(data_tuple[1], mime_type)
+    response = HttpResponse(data_tuple[1], content_type=mime_type)
     response['Content-Disposition'] = 'attachment; filename="' + data_tuple[0] + '"'
     return response
