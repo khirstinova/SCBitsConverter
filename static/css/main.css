@@ -2053,6 +2053,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.5s;
   z-index: 997;
   background: #fff;
+  border-bottom: 1px solid #224a2e;
 }
 
 #header.header-scrolled {
@@ -2339,7 +2340,7 @@ label {
 }
 
 .primary-btn {
-  background: #8490ff;
+  background: #224a2e;;
   line-height: 42px;
   padding-left: 30px;
   padding-right: 30px;
@@ -4318,7 +4319,7 @@ dl.accordion.time-line:before {
 /*  Footer Styles
 /* =================================== */
 .footer-area {
-  background-color: #04091e;
+  background-color: #224a2e;
 }
 
 .single-footer-widget h4 {

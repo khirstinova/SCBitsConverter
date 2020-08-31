@@ -62,6 +62,7 @@ class SCBitsConverter:
         attr = self.xml_document_root.attrib
         attr['{http://specifications.silverchair.com/xsd/1/25/SCBITS-book.xsd}lang'] = "en"
         self.book_meta_root = None
+        self.book_body_root = None
 
         self.sheet_index_handler = {
             0: self.handle_book_sheet,
@@ -70,7 +71,8 @@ class SCBitsConverter:
 
         self.cell_handler_map = {
             "publisher:": self.handle_publisher_cell,
-            "doi:": self.handle_doi_cell
+            "doi:": self.handle_doi_cell,
+            "title:": self.handle_title_element
         }
 
     def convert(self):
@@ -86,26 +88,47 @@ class SCBitsConverter:
         return xml_data
 
     def handle_book_sheet(self, sheet, index):
-        self.book_meta_root = XMLTree.SubElement(self.xml_document_root, 'book-meta')
-        for row in sheet.iter_rows():
-            cell_header = None
-            for cell in row:
-                if cell.value is not None and cell_header is None:
-                    cell_header = cell.value.lower().strip()
-                elif cell.value is not None and cell_header is not None:
-                    if cell_header in self.cell_handler_map.keys():
-                        self.cell_handler_map[cell_header](self.book_meta_root, cell.value)
-                    else:
-                        error_element = XMLTree.SubElement(self.xml_document_root, "error")
-                        error_element.text = "XML conversion error: Unexpected cell header (" + cell_header \
-                                             + ") in sheet " + str(index)
+        if self.book_meta_root is None:
+            self.book_meta_root = XMLTree.SubElement(self.xml_document_root, 'book-meta')
+        self.handle_generic_tags(sheet, index, self.book_meta_root)
         return
 
     def handle_front_matter_sheet(self, sheet, index):
         return None
 
     def handle_chapter_sheet(self, sheet, index):
-        return None
+        if self.book_body_root is None:
+            self.book_body_root = XMLTree.SubElement(self.xml_document_root, 'book-body')
+        part_id = 'part' + str(index - 1)
+        root_chapter_element = XMLTree.SubElement(self.book_body_root, 'book-part')
+        root_chapter_element.set('id', part_id)
+        root_chapter_element.set('book-part-type', 'part')
+        root_meta_element = XMLTree.SubElement(root_chapter_element, 'book-part-meta')
+        self.handle_generic_tags(sheet, index, root_meta_element)
+
+    def handle_generic_tags(self, sheet, index, root_element):
+        row_position = 1
+        for row in sheet.iter_rows():
+            cell_header = None
+            cell_position = 1
+            for cell in row:
+                if cell.value is not None and cell_header is None:
+                    cell_header = cell.value.lower().strip()
+                elif cell.value is not None and cell_header is not None:
+                    if cell_header in self.cell_handler_map.keys():
+                        self.cell_handler_map[cell_header](root_element, cell.value)
+                    else:
+                        error_element = XMLTree.SubElement(self.xml_document_root, "error")
+                        error_element.text = "XML conversion error: Unexpected cell header (" + cell_header \
+                                             + ") in sheet '" + sheet.title + "' at (row, col) (" + str(row_position) \
+                                             + "," + str(cell_position) + ")"
+                cell_position += 1
+            row_position += 1
+
+    def handle_title_element(self, element, title):
+        title_group_element = XMLTree.SubElement(element, 'title-group')
+        title_element = XMLTree.SubElement(title_group_element, 'title')
+        title_element.text = title
 
     def handle_publisher_cell(self, element, publisher):
         publisher_element = XMLTree.SubElement(element, 'book-id')
@@ -113,6 +136,10 @@ class SCBitsConverter:
         publisher_element.text = publisher
 
     def handle_doi_cell(self, element, DOI):
-        doi_element = XMLTree.SubElement(element, 'book-id')
-        doi_element.set('book-id-type', 'doi')
+        if element == self.book_meta_root:
+            doi_element = XMLTree.SubElement(element, 'book-id')
+            doi_element.set('book-id-type', 'doi')
+        else:
+            doi_element = XMLTree.SubElement(element, 'book-part-id')
+            doi_element.set('book-part-id-type', 'doi')
         doi_element.text = DOI
