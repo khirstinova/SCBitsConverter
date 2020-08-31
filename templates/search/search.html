@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% load pages_tags mezzanine_tags i18n staticfiles %}
+{% block meta_title %}
+    Bioerosion TDM Search
+{%endblock%}
+{% block extra_js %}
+<script src="{% static 'js/search.js' %}" xmlns="http://www.w3.org/1999/html"></script><!-- should we serve this from our server? -->
+{% endblock %}
+<!-- Main content of the page-->
+{% block main %}
+	{{ block.super }}
+		{% if page %}
+            <p>{{page.first.richtextpage.content|richtext_filters|safe}}</p>
+		{% else %}
+            <div class="row fullscreen align-items-center justify-content-between">
+                <div class="col-lg-6 col-md-6 banner-left search-form-container">
+                    <form class="form-horizontal" method="post"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
+                        <h3>Search</h3>
+                        <p>&nbsp;</p>
+                        <p>Phrases</p>
+                        <p class="search_1">
+                            <input type="text" id="search_1" name="search_1" />
+                            <button data-next="2">Add Term</button>
+                        </p>
+                        <p class="search_2">
+                            <input type="text" id="search_2" name="search_2" />
+                            <button data-next="3">Add Term</button>
+                            <span class="close">x</span>
+                        </p>
+                        <p class="search_3">
+                            <input type="text" id="search_3" name="search_3" />
+                            <span class="close">x</span>
+                        </p>
+                        <p><select id="proximity" name="proximity" class="">
+                            <option value="0">None</option>
+                            <option value="1">Next Word/Phrase</option>
+                            <option value="2">Same Sentence</option>
+                            <option value="3">Same Paragraph</option>
+                            <option value="4">Same Article</option>
+                        </select>&nbsp;&nbsp;<label for="proximity">Proximity</label></p>
+                        <p><a href="#" id="search-btn" class="primary-btn text-uppercase">Search</a></p>
+                    </form>
+                </div>
+                <div class="col-lg-6 col-md-6 banner-right d-flex">
+                    <div class="search-results-container">
+                        <div class="search-results-table">
+                            <div id="search-ajax-container">
+                            </div>
+                            <div class="search-wait">
+                                <img src="{% static 'img/Loading_icon.gif' %}" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+		{% endif %}
+{% endblock %}

@@ -1,0 +1,13 @@
+*.log
+*.pot
+*.pyc
+local_settings.py
+venv*/
+pyenv*/
+dev.db
+.idea/*
+static/media/*
+mydatabase
+wsgi.py
+support_site*/
+db.sqlite3

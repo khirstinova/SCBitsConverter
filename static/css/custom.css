@@ -1,0 +1,117 @@
+div.col-sm-8 {
+    padding-left: 0px !important;
+}
+
+label.col-sm-2 {
+    padding-left: 0px !important;
+}
+
+.search-form-container select {
+    display: inline;
+    margin-left: 8px;
+}
+
+.search-form-container p {
+    max-width: 340px;
+}
+
+.form-input-error {
+    background-color: #ffae97 !important;
+}
+
+p.search_1, p.search_2, p.search_3 {
+    background-color: #eee;
+    padding: 8px;
+}
+
+p.search_2, p.search_3
+{
+    display: none;
+}
+
+.close {
+    float: right;
+}
+
+.search-results-container {
+    background-color: #fff;
+    box-shadow: 8px 8px 50px #ddd;
+    display: none;
+}
+
+.search-back {
+    display: inline-block;
+}
+
+.search-article-page {
+    display: inline-block;
+    padding-left: 18px;
+}
+
+.export-search-list {
+    display: inline-block;
+    text-align: right;
+    width: 11%;
+}
+
+.search-results-table {
+    display: table;
+    min-height: 400px;
+    padding: 8px;
+}
+
+.search-wait {
+    display: table-cell;
+    vertical-align: middle;
+    width: 100%;
+}
+
+.search-results-list-journals {
+    display: none;
+    width: 100%;
+}
+
+.search-results-list-journals h3 {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.search-results-item-journal {
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin: 10px;
+    padding: 10px;
+    text-align: left;
+}
+
+span.journal-title {
+    font-style: italic;
+}
+
+.search-results-list-articles {
+    display: none;
+    width: 100%;
+}
+
+.search-results-item-article {
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    margin: 10px;
+    padding: 10px;
+    text-align: left;
+}
+
+.article-icon {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.article-listing {
+    display: inline-block;
+    max-width: 409px;
+    padding-left: 8px;
+}
+
+.article-page-link {
+    font-weight: bold;
+}

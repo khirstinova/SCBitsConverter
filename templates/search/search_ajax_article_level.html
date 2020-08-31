@@ -1,0 +1,67 @@
+{% load pages_tags mezzanine_tags i18n staticfiles dict_tags %}
+
+<div class="search-results-list-articles">
+    <div class="search-back">
+        <a data-term1="{{ search_context.term1 }}" data-term2="{{ search_context.term2 }}"
+           data-term3="{{ search_context.term3 }}" data-st="{{ search_context.st }}"  class="journal-back-link"
+        href="#"><- Back</a>&nbsp;
+    </div>
+    <div class="search-article-page">
+        <span>
+            {{ results_context.start }} to {{ results_context.end }} of {{ results_context.num_results }} article(s)
+        </span>
+        <span style="padding-left: 10px;">
+            {% if results_context.page > 0 %}
+                <a data-term1="{{ search_context.term1 }}" data-term2="{{ search_context.term2 }}"
+                    data-term3="{{ search_context.term3 }}" data-st="{{ search_context.st }}"
+                    data-journal="{{ search_context.journal }}" data-page="{{ results_context.previous_page }}"
+                class="article-page-link" href="#"><img alt="Previous Page" src="{% static 'img/previous.png' %}"/></a>
+            {% else %}
+            &nbsp;&nbsp;
+            {% endif %}
+            &nbsp;
+            {% if results_context.page < results_context.page_bound %}
+                <a data-term1="{{ search_context.term1 }}" data-term2="{{ search_context.term2 }}"
+                    data-term3="{{ search_context.term3 }}" data-st="{{ search_context.st }}"
+                    data-journal="{{ search_context.journal }}" data-page="{{ results_context.next_page }}"
+                class="article-page-link" href="#"><img alt="Next Page" src="{% static 'img/next.png' %}"/></a>
+            {% endif %}
+        </span>
+        {% if results_context.num_pages > 1 %}
+        <span style="padding-left: 15px">
+            Go to page
+            <select id="article_page_select" style="display: inline-block">
+                {% with ''|center:results_context.num_pages as range %}
+                {% for _ in range %}
+                    <option value="{{ forloop.counter }}"
+                    {% if forloop.counter == results_context.next_page %}
+                            selected
+                    {% endif %}
+                    >{{ forloop.counter }}</option>
+                {% endfor %}
+                {% endwith %}
+            </select>
+        </span>
+        {% endif %}
+    </div>
+    <div class="export-search-list">
+        <a target="_blank"
+           href="{{ search_context.csv_link_article }}">
+            <img src="{% static 'img/export-icon.png' %}"/></a>
+    </div>
+    {% for r in results_context.results %}
+        <div class="search-results-item-article">
+            <div class="article-icon">
+                <img class="article-icon" src="{% static 'img/article-icon.png' %}"/>
+            </div>
+            <div class="article-listing">
+                <p>Title: {{ r.title }}</p>
+                <p>Journal: {{ r.journal }}</p>
+                <p>{{ r.doi }}</p>
+                <p>{% autoescape off %}{{ r.citation }}{% endautoescape %}</p>
+                <p>{{ results_context|keyvalue:r.journal|keyvalue:r.journal_art_id}} incidences</p>
+            </div>
+        </div>
+    {% endfor %}
+
+</div>

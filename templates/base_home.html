@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% load bootstrap4 static %}
+{% block meta_title %}
+    SCBITS Exporter
+{%endblock%}
+<!-- Main content of the page-->
+{% block main %}
+	{{ block.super }}
+        <div class="row fullscreen align-items-center justify-content-between">
+            <div class="col-lg-6 col-md-6 banner-left">
+                <h4>SCBits Converter</h4>
+                <p>Please use the form on the right to begin. You can either
+                    <ul>
+                        <li>Upload a single spreadsheet</li>
+                        <li>Upload a zip file with multiple spreadsheets</li>
+                    </ul>
+                </p>
+            </div>
+            <div class="col-lg-6 col-md-6 banner-right d-flex">
+                <form enctype="multipart/form-data" method="post">
+                    {% csrf_token %}
+                    <p>
+                        Please select Excel file(s) to convert to SCBITS XML format.
+                    </p>
+                    <p>
+                        {{ form }}
+                    </p>
+                    <p>
+                        <input type="submit" value="Convert" class="primary-btn text-uppercase">
+                    </p>
+                </form>
+            </div>
+        </div>
+	{% endblock %}
+
+	{%block gone%}
+
+{%endblock%}
+{%block sideBar%}
+    {{block.super}}
+{% endblock %}

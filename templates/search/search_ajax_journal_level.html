@@ -1,0 +1,22 @@
+{% load pages_tags mezzanine_tags i18n staticfiles dict_tags %}
+
+<div class="search-results-list-journals">
+    <div class="export-search-list">
+        <a target="_blank"
+           href="{{ search_context.csv_link_journal }}">
+        <img src="{% static 'img/export-icon.png' %}" style="cursor: pointer;"/></a>
+    </div>
+    <h3>Results</h3>
+    <p>{{ results.journal_count }} journal(s) totaling {{ results.unique_result_count }} result(s)</p>
+    {% for j in results.journals %}
+    <div class="search-results-item-journal">
+        <p><img style="float:left; margin-right: 10px" src="{% static 'img/journal-icon.jpg' %}"/>
+            {{ j }}<br><a data-term1="{{ search_context.term1 }}" data-term2="{{ search_context.term2 }}"
+               data-term3="{{ search_context.term3 }}" data-st="{{ search_context.st }}"
+               data-journal="{{ j }}" href="#">
+                {{ results|keyvalue:j|resultcount }} result(s)
+            </a>
+        </p>
+    </div>
+    {% endfor %}
+</div>
