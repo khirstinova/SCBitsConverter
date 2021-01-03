@@ -64,13 +64,22 @@ class SCBitsConverter:
         attr['{http://specifications.silverchair.com/xsd/1/25/SCBITS-book.xsd}lang'] = "en"
         self.book_meta_root = None
         self.book_body_root = None
+        self.permissions_root = None
 
         self.sheet_index_handler = {
             0: self.handle_book_sheet,
             1: self.handle_front_matter_sheet
         }
 
-        self.ignore_items = ['information']
+        self.ignore_items = ['information',
+                             'contributor surname',
+                             'contributor given name',
+                             'contributor prefix',
+                             'contributor suffix',
+                             'contributor corresponding author?',
+                             'contributor affiliated institution',
+                             'supplementary files - type',
+                             'supplementary files - filename']
 
         self.cell_handler_map = {
             "series title": self.handle_series_title_cell,
@@ -82,12 +91,14 @@ class SCBitsConverter:
             "publication date - print": self.handle_ppub_date,
             "eisbn": self.handle_electronic_isbn_element,
             "isbn print 10" : self.handle_isbn10_element,
-            "isbn print 13": self.handle_isbn13_element
+            "isbn print 13": self.handle_isbn13_element,
+            "copyright statement": self.handle_copyright_statement,
+            "copyright year": self.handle_copyright_year
         }
 
         self.multiple_items_cell_handler_map = {
             "supplementary files - id": self.handle_supplemental_items,
-            "contributor - role": self.handle_contrib_items
+            "contributor role": self.handle_contrib_items
         }
 
     def convert(self):
@@ -126,20 +137,23 @@ class SCBitsConverter:
         for row in sheet.iter_rows():
             cell_header = None
             cell_position = 1
+            full_row_processed = False
             for cell in row:
                 if cell.value is not None and cell_header is None:
                     cell_header = cell.value.lower().strip()
-                elif cell.value is not None and cell_header is not None:
+                elif cell.value is not None and cell_header is not None and not full_row_processed:
                     if cell_header in self.multiple_items_cell_handler_map.keys():
                         self.multiple_items_cell_handler_map[cell_header](root_element, sheet,
                                                                           cell_position - 1, row_position)
-                    if cell_header in self.cell_handler_map.keys():
+                        full_row_processed = True
+                    elif cell_header in self.cell_handler_map.keys():
                         self.cell_handler_map[cell_header](root_element, cell.value)
-                    elif cell_header not in self.ignore_items:
-                        error_element = XMLTree.SubElement(self.xml_document_root, "error")
-                        error_element.text = "XML conversion error: Unexpected cell header (" + cell_header \
-                                             + ") in sheet '" + sheet.title + "' at (row, col) (" + str(row_position) \
-                                             + "," + str(cell_position) + ")"
+                    else:
+                        if cell_header not in self.ignore_items:
+                            error_element = XMLTree.SubElement(self.xml_document_root, "error")
+                            error_element.text = "XML conversion error: Unexpected cell header (" + cell_header \
+                                + ") in sheet '" + sheet.title + "' at (row, col) (" + \
+                                str(row_position) + "," + str(cell_position) + ")"
                 cell_position += 1
             row_position += 1
 
@@ -176,7 +190,9 @@ class SCBitsConverter:
             'contributor surname': 0,
             'contributor given name': 0,
             'contributor prefix': 0,
-            'contributor affiliated institution': 0
+            'contributor suffix': 0,
+            'contributor affiliated institution': 0,
+            'contributor corresponding author?': 0
         }
 
         cg_element = XMLTree.SubElement(element, 'contrib-group')
@@ -189,7 +205,7 @@ class SCBitsConverter:
             current_header = sheet.cell(column=cell_position, row=row_position_iter).value.lower()
 
         cell_position_iter = cell_position + 1
-        current_value = sheet.cell(column=cell_position_iter, row=row_position_iter).value
+        current_value = sheet.cell(column=cell_position_iter, row=row_position).value
         while current_value is not None:
             contrib_element = XMLTree.SubElement(cg_element, 'contrib')
             contrib_element.set('contrib-type', sheet.cell(column=cell_position_iter,
@@ -210,34 +226,33 @@ class SCBitsConverter:
                                               row=header_positions['contributor affiliated institution']).value
 
             cell_position_iter += 1
-            current_value = sheet.cell(column=cell_position_iter, row=row_position_iter).value
+            current_value = sheet.cell(column=cell_position_iter, row=row_position).value
 
-
-    def handle_ppub_date(self, element, date):
-        date_time_obj = datetime.datetime.strptime(date, '%m/%d/%Y')
+    def handle_ppub_date(self, element, date_time_obj):
+        # date_time_obj = datetime.datetime.strptime(date, '%m/%d/%Y')
         pub_date_element = XMLTree.SubElement(element, 'pub-date')
         pub_date_element.set('publication-format', 'ppub')
-        pub_date_element.set('iso-8601-date', '{}-{}-{}'.format(date_time_obj.date.year, date_time_obj.date.month,
-                                                                date_time_obj.date.day))
+        pub_date_element.set('iso-8601-date', '{}-{}-{}'.format(date_time_obj.year, date_time_obj.month,
+                                                                date_time_obj.day))
         year_element = XMLTree.SubElement(pub_date_element, 'year')
-        year_element.text = '{}'.format(date_time_obj.date.year)
+        year_element.text = '{}'.format(date_time_obj.year)
         month_element = XMLTree.SubElement(pub_date_element, 'month')
-        month_element.text = '{}'.format(date_time_obj.date.month)
+        month_element.text = '{}'.format(date_time_obj.month)
         day_element = XMLTree.SubElement(pub_date_element, 'day')
-        day_element.text = '{}'.format(date_time_obj.date.day)
+        day_element.text = '{}'.format(date_time_obj.day)
 
-    def handle_epub_date(self, element, date):
-        date_time_obj = datetime.datetime.strptime(date, '%m/%d/%Y')
+    def handle_epub_date(self, element, date_time_obj):
+        # date_time_obj = datetime.datetime.strptime(date, '%m/%d/%Y')
         pub_date_element = XMLTree.SubElement(element, 'pub-date')
         pub_date_element.set('publication-format', 'epub')
-        pub_date_element.set('iso-8601-date', '{}-{}-{}'.format(date_time_obj.date.year, date_time_obj.date.month,
-                                                                date_time_obj.date.day))
+        pub_date_element.set('iso-8601-date', '{}-{}-{}'.format(date_time_obj.year, date_time_obj.month,
+                                                                date_time_obj.day))
         year_element = XMLTree.SubElement(pub_date_element, 'year')
-        year_element.text = '{}'.format(date_time_obj.date.year)
+        year_element.text = '{}'.format(date_time_obj.year)
         month_element = XMLTree.SubElement(pub_date_element, 'month')
-        month_element.text = '{}'.format(date_time_obj.date.month)
+        month_element.text = '{}'.format(date_time_obj.month)
         day_element = XMLTree.SubElement(pub_date_element, 'day')
-        day_element.text = '{}'.format(date_time_obj.date.day)
+        day_element.text = '{}'.format(date_time_obj.day)
 
     def handle_electronic_isbn_element(self, element, isbn):
         isbn_element = XMLTree.SubElement(element, 'isbn')
@@ -286,3 +301,15 @@ class SCBitsConverter:
             doi_element = XMLTree.SubElement(element, 'book-part-id')
             doi_element.set('book-part-id-type', 'doi')
         doi_element.text = DOI
+
+    def handle_copyright_statement(self, element, statement):
+        if self.permissions_root is None:
+            self.permissions_root = XMLTree.SubElement(self.book_meta_root, 'permissions')
+        copyright_statement_element = XMLTree.SubElement(self.permissions_root, 'copyright-statement')
+        copyright_statement_element.text = statement
+
+    def handle_copyright_year(self, element, year):
+        if self.permissions_root is None:
+            self.permissions_root = XMLTree.SubElement(self.book_meta_root, 'permissions')
+        copyright_statement_element = XMLTree.SubElement(self.permissions_root, 'copyright-year')
+        copyright_statement_element.text = str(year)
