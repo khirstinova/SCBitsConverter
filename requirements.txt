@@ -11,7 +11,7 @@ idna==2.8
 lxml
 oauthlib==2.1.0
 openpyxl==3.0.5
-Pillow==5.4.0
+Pillow==10.3.0
 requests==2.21.0
 requests_oauthlib==1.0.0
 soupsieve==1.6.2
